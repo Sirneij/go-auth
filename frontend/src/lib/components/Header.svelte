@@ -16,9 +16,15 @@
 			<div class="header-nav-item" class:active={$page.url.pathname === '/'}>
 				<a href="/">Home</a>
 			</div>
-			<div class="header-nav-item" class:active={$page.url.pathname === '/auth/login'}>
-				<a href="/auth/login">Login</a>
-			</div>
+			{#if !$page.data.user}
+				<div class="header-nav-item" class:active={$page.url.pathname === '/auth/login'}>
+					<a href="/auth/login">Login</a>
+				</div>
+			{:else}
+				<div class="header-nav-item" class:active={$page.url.pathname === '/auth/logout'}>
+					<a href="/auth/logout">Logout</a>
+				</div>
+			{/if}
 		</div>
 	</div>
 </header>

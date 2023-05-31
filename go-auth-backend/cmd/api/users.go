@@ -182,14 +182,14 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	db_user, err := app.models.Users.GetEmail(input.Email)
 
 	if err != nil {
-		app.logger.PrintFatal(err, nil)
+		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
 	match, err := db_user.Password.Matches(input.Password)
 	if err != nil {
-		app.logger.PrintFatal(err, nil)
+		app.logger.PrintError(err, nil)
 		return
 	}
 
@@ -238,8 +238,6 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 func (app *application) currentUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	gobEncodedValue, err := cookies.ReadEncrypted(r, "sessionid", app.config.secret.secretKey)
-
-	app.logger.PrintInfo(gobEncodedValue, nil)
 
 	if err != nil {
 		switch {

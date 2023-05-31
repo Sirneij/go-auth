@@ -3,9 +3,7 @@ package cookies
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/hmac"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -43,42 +41,6 @@ func Read(r *http.Request, name string) (string, error) {
 	}
 
 	return string(value), nil
-}
-
-func WriteSigned(w http.ResponseWriter, cookie http.Cookie, secretKey []byte) error {
-	mac := hmac.New(sha256.New, secretKey)
-	mac.Write([]byte(cookie.Name))
-	mac.Write([]byte(cookie.Value))
-	signature := mac.Sum(nil)
-
-	cookie.Value = string(signature) + cookie.Value
-
-	return Write(w, cookie)
-}
-
-func ReadSigned(r *http.Request, name string, secretKey []byte) (string, error) {
-	signedValue, err := Read(r, name)
-	if err != nil {
-		return "", err
-	}
-
-	if len(signedValue) < sha256.Size {
-		return "", ErrInvalidValue
-	}
-
-	signature := signedValue[:sha256.Size]
-	value := signedValue[sha256.Size:]
-
-	mac := hmac.New(sha256.New, secretKey)
-	mac.Write([]byte(name))
-	mac.Write([]byte(value))
-	expectedSignature := mac.Sum(nil)
-
-	if !hmac.Equal([]byte(signature), expectedSignature) {
-		return "", ErrInvalidValue
-	}
-
-	return value, nil
 }
 
 func WriteEncrypted(w http.ResponseWriter, cookie http.Cookie, secretKey []byte) error {

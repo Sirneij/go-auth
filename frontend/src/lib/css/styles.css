@@ -68,11 +68,13 @@ ul {
 	margin: 0 0 32px;
 }
 a {
+	transition: border 0.2s ease-in-out;
+	border-bottom: 1px solid transparent;
 	text-decoration: none;
-	color: #d43aff;
+	color: #00b7ef;
 }
 a:hover {
-	color: #c907ff;
+	border-bottom-color: #00b7ef;
 }
 li {
 	line-height: 1.8;
@@ -342,9 +344,11 @@ li strong {
 	flex-grow: 1;
 }
 .container .content .step-title {
+	color: #fff;
 	font-size: 20px;
 	font-weight: 500;
 	line-height: 86px;
+	opacity: 1;
 }
 .container .content .step-subtitle {
 	position: relative;
