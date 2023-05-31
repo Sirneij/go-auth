@@ -13,6 +13,9 @@
 			<span class="label">Password:</span>
 			<input class="input" type="password" placeholder="Password" />
 		</div>
-		<button class="button-colorful">Login</button>
+		<div class="btn-container">
+			<button class="button-colorful">Login</button>
+			<p>Have no account? <a href="/auth/register">Register here</a>.</p>
+		</div>
 	</form>
 </div>
