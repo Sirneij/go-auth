@@ -199,11 +199,11 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var buf bytes.Buffer
-
 	var userID = data.UserID{
 		Id: db_user.ID,
 	}
+
+	var buf bytes.Buffer
 
 	// Gob-encode the user data, storing the encoded output in the buffer.
 	err = gob.NewEncoder(&buf).Encode(&userID)
