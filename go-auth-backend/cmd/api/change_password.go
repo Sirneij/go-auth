@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"goauthbackend.johnowolabiidogun.dev/internal/data"
 	"goauthbackend.johnowolabiidogun.dev/internal/tokens"
 	"goauthbackend.johnowolabiidogun.dev/internal/validator"
 )
 
-func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 
 	if err != nil {
@@ -21,7 +22,8 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	var input struct {
-		Secret string `json:"token"`
+		Secret   string `json:"token"`
+		Password string `json:"password"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -37,7 +39,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	hash, err := app.getFromRedis(fmt.Sprintf("activation_%s", id))
+	hash, err := app.getFromRedis(fmt.Sprintf("password_reset_%s", id))
 	if err != nil {
 		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
@@ -55,17 +57,27 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	ctx := context.Background()
-	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("activation_%s", id)).Result()
+	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("password_reset_%s", id)).Result()
 	if err != nil {
 		app.logger.PrintError(err, map[string]string{
-			"key": fmt.Sprintf("activation_%s", id),
+			"key": fmt.Sprintf("password_reset_%s", id),
 		})
-
 	}
-
 	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil)
 
-	result, err := app.models.Users.ActivateUser(*id)
+	user := &data.User{
+		ID: *id,
+	}
+
+	// Hash user password
+	err = user.Password.Set(input.Password)
+	if err != nil {
+		app.logger.PrintError(err, nil)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	result, err := app.models.Users.UpdateUserPassword(user)
 	if err != nil {
 		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
@@ -74,5 +86,5 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 
 	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil)
 
-	app.successResponse(w, r, http.StatusOK, "Account activated successfully.")
+	app.successResponse(w, r, http.StatusOK, "Password updated successfully.")
 }

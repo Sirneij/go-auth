@@ -13,15 +13,19 @@ func (app *application) logoutUserHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		switch *status {
 		case http.StatusUnauthorized:
+			app.logger.PrintError(err, nil)
 			app.unauthorizedResponse(w, r, err)
 
 		case http.StatusBadRequest:
+			app.logger.PrintError(err, nil)
 			app.badRequestResponse(w, r, errors.New("invalid cookie"))
 
 		case http.StatusInternalServerError:
+			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, err)
 
 		default:
+			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, errors.New("something happened and we could not fullfil your request at the moment"))
 		}
 		return
@@ -30,6 +34,7 @@ func (app *application) logoutUserHandler(w http.ResponseWriter, r *http.Request
 	// Get session from redis
 	_, err = app.getFromRedis(fmt.Sprintf("sessionid_%s", userID.Id))
 	if err != nil {
+		app.logger.PrintError(err, nil)
 		app.unauthorizedResponse(w, r, errors.New("you are not authorized to access this resource"))
 		return
 	}

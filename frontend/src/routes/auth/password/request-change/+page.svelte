@@ -7,7 +7,7 @@
 	export let form;
 
 	/** @type {import('./$types').SubmitFunction} */
-	const handleGenerate = async () => {
+	const handleRequestChange = async () => {
 		return async ({ result }) => {
 			await applyAction(result);
 		};
@@ -15,8 +15,8 @@
 </script>
 
 <div class="container">
-	<form class="content" method="POST" use:enhance={handleGenerate}>
-		<h1 class="step-title">Regenerate token</h1>
+	<form class="content" method="POST" use:enhance={handleRequestChange}>
+		<h1 class="step-title">Request Password Change</h1>
 		{#if form?.errors}
 			{#each form?.errors as error (error.id)}
 				<h4
@@ -36,7 +36,7 @@
 				type="email"
 				name="email"
 				id="email"
-				placeholder="Registered e-mail address"
+				placeholder="Verified e-mail address"
 				required
 			/>
 		</div>
@@ -46,6 +46,6 @@
 			</p>
 		{/if}
 
-		<button class="button-colorful">Regenerate</button>
+		<button class="button-colorful">Request change</button>
 	</form>
 </div>

@@ -96,6 +96,20 @@ func (um UserModel) ActivateUser(userID uuid.UUID) (*sql.Result, error) {
 	return &result, nil
 }
 
+func (um UserModel) UpdateUserPassword(user *User) (*sql.Result, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `UPDATE users SET password = $1 WHERE id = $2`
+
+	result, err := um.DB.ExecContext(ctx, query, user.Password.hash, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

@@ -21,6 +21,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Try reading the user input to JSON
 	err := app.readJSON(w, r, &input)
 	if err != nil {
+		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -34,6 +35,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Hash user password
 	err = user.Password.Set(input.Password)
 	if err != nil {
+		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
@@ -51,8 +53,10 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "A user with this email address already exists")
+			app.logger.PrintError(err, nil)
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
+			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, err)
 		}
 		return
@@ -94,6 +98,6 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		w,
 		r,
 		http.StatusAccepted,
-		"Your account creation was accepted successfully. Check your email address and follow the instruction to actuivate your account. Ensure you activate your account before the token expires",
+		"Your account creation was accepted successfully. Check your email address and follow the instruction to activate your account. Ensure you activate your account before the token expires",
 	)
 }

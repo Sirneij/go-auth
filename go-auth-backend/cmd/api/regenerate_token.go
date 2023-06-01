@@ -18,6 +18,7 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 	// Try reading the user input to JSON
 	err := app.readJSON(w, r, &input)
 	if err != nil {
+		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}

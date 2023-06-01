@@ -46,7 +46,7 @@
 		<div class="input-box">
 			<span class="label">Password:</span>
 			<input class="input" type="password" name="password" placeholder="Password" />
-			<a href="/#" style="margin-left: 1rem;">Forgot password?</a>
+			<a href="/auth/password/request-change" style="margin-left: 1rem;">Forgot password?</a>
 		</div>
 		<div class="btn-container">
 			<button class="button-colorful">Login</button>
