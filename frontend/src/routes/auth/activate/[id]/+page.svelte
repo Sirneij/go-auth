@@ -34,10 +34,12 @@
 		<div class="input-box">
 			<span class="label">Token:</span>
 			<input
+				type="text"
 				class="input"
-				type="number"
 				name="token"
-				placeholder="XXXXXX"
+				placeholder="XXX XXX"
+				inputmode="numeric"
+				pattern="\d*"
 				maxlength="6"
 				minlength="6"
 			/>

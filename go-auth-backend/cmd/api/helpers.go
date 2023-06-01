@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
+	"goauthbackend.johnowolabiidogun.dev/internal/cookies"
+	"goauthbackend.johnowolabiidogun.dev/internal/data"
 )
 
 func (app *application) writeJSON(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
@@ -134,4 +137,42 @@ func (app *application) readIDParam(r *http.Request) (*uuid.UUID, error) {
 		return nil, errors.New("invalid id parameter")
 	}
 	return &id, nil
+}
+
+func (app *application) extractParamsFromSession(r *http.Request) (*data.UserID, *int, error) {
+	gobEncodedValue, err := cookies.ReadEncrypted(r, "sessionid", app.config.secret.secretKey)
+
+	if err != nil {
+		var errorData error
+		var status int
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			app.logger.PrintError(err, nil)
+			status = http.StatusUnauthorized
+			errorData = errors.New("you are not authorized to access this resource")
+
+		case errors.Is(err, cookies.ErrInvalidValue):
+			app.logger.PrintError(err, nil)
+			status = http.StatusBadRequest
+			errorData = errors.New("invalid cookie")
+
+		default:
+			app.logger.PrintError(err, nil)
+			status = http.StatusInternalServerError
+			errorData = errors.New("something happened getting your cookie data")
+
+		}
+		return nil, &status, errorData
+	}
+
+	var userID data.UserID
+
+	reader := strings.NewReader(gobEncodedValue)
+	if err := gob.NewDecoder(reader).Decode(&userID); err != nil {
+		app.logger.PrintError(err, nil)
+		status := http.StatusInternalServerError
+		return nil, &status, errors.New("something happened decosing your cookie data")
+	}
+
+	return &userID, nil, nil
 }

@@ -31,9 +31,7 @@ code {
 	font-family: 'Roboto Mono', monospace;
 	font-size: 16px;
 }
-input[type='number'] {
-	all: unset;
-}
+
 input {
 	font-family: 'Roboto Mono', monospace;
 	color: white;
