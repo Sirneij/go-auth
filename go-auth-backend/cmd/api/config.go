@@ -70,7 +70,7 @@ func updateConfigWithEnvVariables() (*config, error) {
 	flag.Parse()
 
 	cfg.awsConfig.BaseURL = fmt.Sprintf(
-		"https://%s.s3.%s.amazonaws.com/",
+		"https://%s.s3.%s.amazonaws.com",
 		cfg.awsConfig.BucketName,
 		cfg.awsConfig.Region,
 	)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -110,7 +111,7 @@ func (um UserModel) UpdateUserPassword(user *User) (*sql.Result, error) {
 	return &result, nil
 }
 
-func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
+func (um UserModel) Update(user *User) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -130,22 +131,8 @@ func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
 		last_name = COALESCE($2, last_name), 
 		thumbnail = COALESCE($3, thumbnail)
 	WHERE 
-		id = $4 
-		AND is_active = true 
-		AND (
-			$1 IS NOT NULL 
-			AND $1 IS DISTINCT 
-			FROM 
-				first_name 
-				OR $2 IS NOT NULL 
-				AND $2 IS DISTINCT 
-			FROM 
-				last_name 
-				OR $3 IS DISTINCT 
-			FROM 
-				thumbnail
-		)
-	RETURNING id, email, password, first_name, last_name, is_active, is_staff, is_superuser, thumbnail, date_joined,
+		id = $4 AND is_active = true
+	RETURNING id, email, password, first_name, last_name, is_active, is_staff, is_superuser, thumbnail, date_joined
 	`
 	args_user := []interface{}{user.FirstName, user.LastName, user.Thumbnail, user.ID}
 
@@ -153,6 +140,7 @@ func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
 		&userOut.Email, &userOut.Password.hash, &userOut.FirstName, &userOut.LastName, &userOut.IsActive, &userOut.IsStaff, &userOut.IsSuperuser, &userOut.Thumbnail, &userOut.DateJoined)
 
 	if err != nil {
+		log.Printf("User: %v", err)
 		return nil, err
 	}
 
@@ -164,31 +152,21 @@ func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
 		birth_date = $2, 
 		github_link = NULLIF($3, '')
 	WHERE 
-		user_id = $4 
-		AND (
-			$1 IS DISTINCT 
-			FROM 
-				phone_number 
-				OR $2 IS DISTINCT 
-			FROM 
-				birth_date 
-				OR $3 IS DISTINCT 
-			FROM 
-				github_link
-		)
+		user_id = $4
 	RETURNING id, user_id, phone_number, birth_date, github_link
 	`
 
 	args_profile_user := []interface{}{
-		userP.PhoneNumber,
-		userP.BirthDate,
-		userP.GithubLink,
+		user.Profile.PhoneNumber,
+		user.Profile.BirthDate.Time,
+		user.Profile.GithubLink,
 		user.ID,
 	}
 
 	err = tx.QueryRowContext(ctx, query_user_profile, args_profile_user...).Scan(&userPOut.ID, &userPOut.UserID, &userPOut.PhoneNumber, &userPOut.BirthDate, &userPOut.GithubLink)
 
 	if err != nil {
+		log.Printf("Profile: %v", err)
 		return nil, err
 	}
 

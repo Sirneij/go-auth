@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/base32"
 	"fmt"
 	"net/http"
 	"strings"
@@ -28,8 +28,8 @@ func (app *application) uploadFileToS3(r *http.Request) (*string, error) {
 		return nil, err
 	}
 
-	// Encode bytes in base64
-	s := base64.StdEncoding.EncodeToString(b)
+	// Encode bytes in base32 without the trailing ==
+	s := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b)
 
 	fileName := fmt.Sprintf("%s_%s", s, handler.Filename)
 	key := fmt.Sprintf("%s%s", app.config.awsConfig.s3_key_prefix, fileName)

@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -37,18 +38,23 @@ func (nt *NullTime) MarshalJSON() ([]byte, error) {
 	return []byte(val), nil
 }
 
+const dateFormat = "2006-01-02"
+
 // UnmarshalJSON for NullTime
 func (nt *NullTime) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	// s = Stripchars(s, "\"")
+	t, err := time.Parse(dateFormat, strings.Replace(
+		string(b),
+		"\"",
+		"",
+		-1,
+	))
 
-	x, err := time.Parse(time.RFC3339, s)
 	if err != nil {
-		nt.Valid = false
 		return err
 	}
 
-	nt.Time = x
+	nt.Time = t
 	nt.Valid = true
+
 	return nil
 }
