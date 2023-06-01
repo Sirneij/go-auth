@@ -6,6 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 	"goauthbackend.johnowolabiidogun.dev/internal/data"
@@ -42,6 +45,14 @@ type config struct {
 		secretKey         []byte
 		sessionExpiration time.Duration
 	}
+	awsConfig struct {
+		AccessKeyID     string
+		AccessKeySecret string
+		Region          string
+		BucketName      string
+		BaseURL         string
+		s3_key_prefix   string
+	}
 }
 
 type application struct {
@@ -51,6 +62,7 @@ type application struct {
 	mailer      mailer.Mailer
 	wg          sync.WaitGroup
 	redisClient *redis.Client
+	S3Client    *s3.Client
 }
 
 func main() {
@@ -78,6 +90,15 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 
+	sdkConfig := aws.Config{
+		Region: cfg.awsConfig.Region,
+		Credentials: credentials.NewStaticCredentialsProvider(
+			cfg.awsConfig.AccessKeyID, cfg.awsConfig.AccessKeySecret, "",
+		),
+	}
+
+	s3Client := s3.NewFromConfig(sdkConfig)
+
 	client := redis.NewClient(opt)
 
 	logger.PrintInfo("redis connection pool established", nil)
@@ -88,6 +109,7 @@ func main() {
 		models:      data.NewModels(db),
 		mailer:      mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 		redisClient: client,
+		S3Client:    s3Client,
 	}
 
 	err = app.serve()
