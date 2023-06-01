@@ -31,6 +31,9 @@ code {
 	font-family: 'Roboto Mono', monospace;
 	font-size: 16px;
 }
+input[type='number'] {
+	all: unset;
+}
 input {
 	font-family: 'Roboto Mono', monospace;
 	color: white;
@@ -345,9 +348,6 @@ li strong {
 	transition: opacity 0.2s ease-in-out;
 	color: white;
 	letter-spacing: 0;
-	opacity: 0.4;
-}
-.container.active {
 	opacity: 1;
 }
 

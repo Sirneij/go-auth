@@ -12,6 +12,11 @@
 			await applyAction(result);
 		};
 	};
+
+	let message = '';
+	if ($page.url.search) {
+		message = $page.url.search.split('=')[1].replaceAll('%20', ' ');
+	}
 </script>
 
 <div class="container">
@@ -27,6 +32,10 @@
 					{error.error}
 				</h4>
 			{/each}
+		{/if}
+
+		{#if message}
+			<h4 class="step-subtitle">{message}</h4>
 		{/if}
 
 		<input type="hidden" name="next" value={$page.url.searchParams.get('next')} />

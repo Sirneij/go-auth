@@ -162,6 +162,8 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil)
+
+	app.successResponse(w, r, http.StatusOK, "Account activated successfully.")
 }
 
 func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request) {

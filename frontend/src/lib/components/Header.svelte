@@ -15,11 +15,14 @@
 		</div>
 		<div class="header-right">
 			<div class="header-nav-item" class:active={$page.url.pathname === '/'}>
-				<a href="/">Home</a>
+				<a href="/">home</a>
 			</div>
 			{#if !$page.data.user}
 				<div class="header-nav-item" class:active={$page.url.pathname === '/auth/login'}>
-					<a href="/auth/login">Login</a>
+					<a href="/auth/login">login</a>
+				</div>
+				<div class="header-nav-item" class:active={$page.url.pathname === '/auth/register'}>
+					<a href="/auth/register">register</a>
 				</div>
 			{:else}
 				<form
@@ -32,7 +35,7 @@
 						};
 					}}
 				>
-					<button type="submit">Logout</button>
+					<button type="submit">logout</button>
 				</form>
 			{/if}
 		</div>

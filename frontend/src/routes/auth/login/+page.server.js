@@ -1,4 +1,5 @@
 import { BASE_API_URI } from '$lib/utils/constants';
+import { formatError } from '$lib/utils/helpers';
 import { fail, redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -41,11 +42,7 @@ export const actions = {
 
 		if (!res.ok) {
 			const response = await res.json();
-			const errors = [];
-			errors.push({
-				error: response.error.charAt(0).toUpperCase() + response.error.slice(1),
-				id: 0
-			});
+			const errors = formatError(response.error);
 			return fail(400, { errors: errors });
 		}
 
