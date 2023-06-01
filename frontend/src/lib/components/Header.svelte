@@ -1,4 +1,5 @@
 <script>
+	import { applyAction, enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import Developer from '$lib/img/hero-image.png';
 </script>
@@ -21,9 +22,18 @@
 					<a href="/auth/login">Login</a>
 				</div>
 			{:else}
-				<div class="header-nav-item" class:active={$page.url.pathname === '/auth/logout'}>
-					<a href="/auth/logout">Logout</a>
-				</div>
+				<form
+					class="header-nav-item"
+					action="/auth/logout"
+					method="POST"
+					use:enhance={async () => {
+						return async ({ result }) => {
+							await applyAction(result);
+						};
+					}}
+				>
+					<button type="submit">Logout</button>
+				</form>
 			{/if}
 		</div>
 	</div>

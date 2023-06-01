@@ -71,7 +71,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.logger.PrintError(err, nil)
 	}
 
-	err = app.storeHashInRedis(otp.Hash, userID.Id)
+	err = app.storeInRedis("activation_", otp.Hash, userID.Id, app.config.tokenExpiration.duration)
 	if err != nil {
 		app.logger.PrintError(err, nil)
 	}
@@ -129,7 +129,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	hash, err := app.getHashFromRedis(fmt.Sprintf("activation_%s", id))
+	hash, err := app.getFromRedis(fmt.Sprintf("activation_%s", id))
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
@@ -146,7 +146,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 
 	ctx := context.Background()
 	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("activation_%s", id)).Result()
-
 	if err != nil {
 		app.logger.PrintError(err, map[string]string{
 			"key": fmt.Sprintf("activation_%s", id),
@@ -213,12 +212,19 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	app.logger.PrintInfo("Creating a cookie", nil)
+	session := buf.String()
+
+	// Store session in redis
+	err = app.storeInRedis("sessionid_", session, userID.Id, app.config.secret.sessionExpiration)
+	if err != nil {
+		app.logger.PrintError(err, nil)
+	}
+
 	cookie := http.Cookie{
 		Name:     "sessionid",
-		Value:    buf.String(),
+		Value:    session,
 		Path:     "/",
-		MaxAge:   3600,
+		MaxAge:   int(app.config.secret.sessionExpiration.Seconds()),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
@@ -243,7 +249,7 @@ func (app *application) currentUserHandler(w http.ResponseWriter, r *http.Reques
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
 			app.logger.PrintError(err, nil)
-			app.badRequestResponse(w, r, errors.New("cookie not found"))
+			app.unauthorizedResponse(w, r, errors.New("you are not authorized to access this resource"))
 		case errors.Is(err, cookies.ErrInvalidValue):
 			app.logger.PrintError(err, nil)
 			app.badRequestResponse(w, r, errors.New("invalid cookie"))
@@ -263,6 +269,13 @@ func (app *application) currentUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Get session from redis
+	_, err = app.getFromRedis(fmt.Sprintf("sessionid_%s", userID.Id))
+	if err != nil {
+		app.unauthorizedResponse(w, r, errors.New("you are not authorized to access this resource"))
+		return
+	}
+
 	db_user, err := app.models.Users.Get(userID.Id)
 
 	if err != nil {
@@ -272,4 +285,59 @@ func (app *application) currentUserHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	app.writeJSON(w, http.StatusOK, db_user, nil)
+}
+
+func (app *application) logoutUserHandler(w http.ResponseWriter, r *http.Request) {
+	gobEncodedValue, err := cookies.ReadEncrypted(r, "sessionid", app.config.secret.secretKey)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			app.logger.PrintError(err, nil)
+			app.unauthorizedResponse(w, r, errors.New("you are not authorized to access this resource"))
+		case errors.Is(err, cookies.ErrInvalidValue):
+			app.logger.PrintError(err, nil)
+			app.badRequestResponse(w, r, errors.New("invalid cookie"))
+		default:
+			app.logger.PrintError(err, nil)
+			app.serverErrorResponse(w, r, errors.New("something happened getting your cookie data"))
+		}
+		return
+	}
+
+	var userID data.UserID
+
+	reader := strings.NewReader(gobEncodedValue)
+	if err := gob.NewDecoder(reader).Decode(&userID); err != nil {
+		app.logger.PrintError(err, nil)
+		app.serverErrorResponse(w, r, errors.New("something happened decosing your cookie data"))
+		return
+	}
+
+	// Get session from redis
+	_, err = app.getFromRedis(fmt.Sprintf("sessionid_%s", userID.Id))
+	if err != nil {
+		app.unauthorizedResponse(w, r, errors.New("you are not authorized to access this resource"))
+		return
+	}
+
+	// Delete session from redis
+	ctx := context.Background()
+	_, err = app.redisClient.Del(ctx, fmt.Sprintf("sessionid_%s", userID.Id)).Result()
+	if err != nil {
+		app.logger.PrintError(err, map[string]string{
+			"key": fmt.Sprintf("sessionid_%s", userID.Id),
+		})
+		app.serverErrorResponse(w, r, errors.New("something happened decosing your cookie data"))
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "sessionid",
+		Value:   "",
+		Expires: time.Now(),
+	})
+
+	// Respond with success
+	app.successResponse(w, r, http.StatusOK, "You have successfully logged out")
 }

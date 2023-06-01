@@ -38,8 +38,9 @@ type config struct {
 		duration       time.Duration
 	}
 	secret struct {
-		HMC       string
-		secretKey []byte
+		HMC               string
+		secretKey         []byte
+		sessionExpiration time.Duration
 	}
 }
 

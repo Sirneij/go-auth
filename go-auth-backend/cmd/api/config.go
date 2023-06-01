@@ -67,6 +67,11 @@ func updateConfigWithEnvVariables() (*config, error) {
 		return nil, err
 	}
 	cfg.secret.secretKey = secretKey
+	sessionDuration, err := time.ParseDuration(os.Getenv("SESSION_EXPIRATION"))
+	if err != nil {
+		return nil, err
+	}
+	cfg.secret.sessionExpiration = sessionDuration
 
 	// Token Expiration
 	tokexpirationStr := os.Getenv("TOKEN_EXPIRATION")

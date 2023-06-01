@@ -44,6 +44,10 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 	app.logError(r, err)
 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
+func (app *application) unauthorizedResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logError(r, err)
+	app.errorResponse(w, r, http.StatusUnauthorized, err.Error())
+}
 
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 

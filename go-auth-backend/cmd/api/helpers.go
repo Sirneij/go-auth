@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
@@ -100,13 +101,13 @@ func (app *application) background(fn func()) {
 	}()
 }
 
-func (app *application) storeHashInRedis(hash string, userID uuid.UUID) error {
+func (app *application) storeInRedis(prefix string, hash string, userID uuid.UUID, expiration time.Duration) error {
 	ctx := context.Background()
 	err := app.redisClient.Set(
 		ctx,
-		fmt.Sprintf("activation_%s", userID),
+		fmt.Sprintf("%s%s", prefix, userID),
 		hash,
-		app.config.tokenExpiration.duration,
+		expiration,
 	).Err()
 	if err != nil {
 		return err
@@ -115,7 +116,7 @@ func (app *application) storeHashInRedis(hash string, userID uuid.UUID) error {
 	return nil
 }
 
-func (app *application) getHashFromRedis(key string) (*string, error) {
+func (app *application) getFromRedis(key string) (*string, error) {
 	ctx := context.Background()
 
 	hash, err := app.redisClient.Get(ctx, key).Result()

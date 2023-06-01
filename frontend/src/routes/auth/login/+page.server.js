@@ -50,15 +50,22 @@ export const actions = {
 		}
 
 		if (res.headers.has('Set-Cookie')) {
+			console.log();
 			const sessionID = Object.fromEntries(res.headers)
 				['set-cookie'].split(';')[0]
 				.split(/=(.*)/s)[1];
 
+			const path = Object.fromEntries(res.headers)['set-cookie'].split(';')[1].split('=')[1];
+			const maxAge = Number(
+				Object.fromEntries(res.headers)['set-cookie'].split(';')[2].split('=')[1]
+			);
+
 			cookies.set('go-auth-sessionid', sessionID, {
 				httpOnly: true,
 				sameSite: 'lax',
-				path: '/',
-				secure: true
+				path: path,
+				secure: true,
+				maxAge: maxAge
 			});
 		}
 
