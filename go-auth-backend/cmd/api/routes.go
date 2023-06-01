@@ -18,6 +18,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/users/logout/", app.logoutUserHandler)
 	router.HandlerFunc(http.MethodGet, "/users/current-user/", app.currentUserHandler)
 	router.HandlerFunc(http.MethodPut, "/users/activate/:id/", app.activateUserHandler)
+	router.HandlerFunc(http.MethodPost, "/users/regenerate-token/", app.regenerateTokenHandler)
 
 	return app.recoverPanic(router)
 }

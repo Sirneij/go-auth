@@ -24,7 +24,7 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	db_user, err := app.models.Users.GetEmail(input.Email)
+	db_user, err := app.models.Users.GetEmail(input.Email, true)
 
 	if err != nil {
 		app.logger.PrintError(err, nil)

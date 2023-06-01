@@ -4,95 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"time"
 
-	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"
-	"goauthbackend.johnowolabiidogun.dev/internal/types"
-	"goauthbackend.johnowolabiidogun.dev/internal/validator"
 )
-
-var (
-	ErrDuplicateEmail = errors.New("duplicate email")
-)
-
-type UserProfile struct {
-	ID          *uuid.UUID     `json:"id"`
-	UserID      *uuid.UUID     `json:"user_id"`
-	PhoneNumber *string        `json:"phone_number"`
-	BirthDate   types.NullTime `json:"birth_date"`
-	GithubLink  *string        `json:"github_link"`
-}
-
-type User struct {
-	ID          uuid.UUID   `json:"id"`
-	Email       string      `json:"email"`
-	Password    password    `json:"-"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	IsActive    bool        `json:"is_active"`
-	IsStaff     bool        `json:"is_staff"`
-	IsSuperuser bool        `json:"is_superuser"`
-	Thumbnail   *string     `json:"thumbnail"`
-	DateJoined  time.Time   `json:"date_joined"`
-	Profile     UserProfile `json:"profile"`
-}
-
-type password struct {
-	plaintext *string
-	hash      string
-}
-
-func (p *password) Set(plaintextPassword string) error {
-	hash, err := argon2id.CreateHash(plaintextPassword, argon2id.DefaultParams)
-	if err != nil {
-		return err
-	}
-	p.plaintext = &plaintextPassword
-	p.hash = hash
-	return nil
-}
-
-func (p *password) Matches(plaintextPassword string) (bool, error) {
-	match, err := argon2id.ComparePasswordAndHash(plaintextPassword, p.hash)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return match, nil
-}
-
-func ValidateEmail(v *validator.Validator, email string) {
-	v.Check(email != "", "email", "must be provided")
-	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")
-}
-
-func ValidatePasswordPlaintext(v *validator.Validator, password string) {
-	v.Check(password != "", "password", "must be provided")
-	v.Check(len(password) >= 8, "password", "must be at least 8 bytes long")
-	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
-}
-
-func ValidateUser(v *validator.Validator, user *User) {
-	v.Check(user.FirstName != "", "first_name", "must be provided")
-	v.Check(user.LastName != "", "last_name", "must be provided")
-
-	ValidateEmail(v, user.Email)
-	// If the plaintext password is not nil, call the standalone // ValidatePasswordPlaintext() helper.
-	if user.Password.plaintext != nil {
-		ValidatePasswordPlaintext(v, *user.Password.plaintext)
-	}
-
-}
-
-type UserModel struct {
-	DB *sql.DB
-}
-
-type UserID struct {
-	Id uuid.UUID
-}
 
 func (um UserModel) Insert(user *User) (*UserID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -272,7 +187,7 @@ func (um UserModel) Update(user *User, userP *UserProfile) (*User, error) {
 	return &userOut, nil
 }
 
-func (um UserModel) GetEmail(email string) (*User, error) {
+func (um UserModel) GetEmail(email string, active bool) (*User, error) {
 	query := `
 	SELECT 
 		u.*, p.*
@@ -280,7 +195,7 @@ func (um UserModel) GetEmail(email string) (*User, error) {
 		users u 
 		JOIN user_profile p ON p.user_id = u.id 
 	WHERE 
-		u.is_active = true AND u.email = $1`
+		u.is_active = $2 AND u.email = $1`
 
 	var user User
 	var userP UserProfile
@@ -288,7 +203,7 @@ func (um UserModel) GetEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := um.DB.QueryRowContext(ctx, query, email).Scan(
+	err := um.DB.QueryRowContext(ctx, query, email, active).Scan(
 		&user.ID,
 		&user.Email,
 		&user.Password.hash,
@@ -309,7 +224,11 @@ func (um UserModel) GetEmail(email string) (*User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			if active {
+				return nil, ErrRecordNotFound
+			} else {
+				return nil, errors.New("an inactive user with the provided email address was not found")
+			}
 		default:
 			return nil, err
 		}
