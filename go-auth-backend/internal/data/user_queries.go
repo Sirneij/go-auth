@@ -149,7 +149,7 @@ func (um UserModel) Update(user *User) (*User, error) {
 		user_profile 
 	SET 
 		phone_number = NULLIF($1, ''), 
-		birth_date = $2, 
+		birth_date = $2::timestamp::date, 
 		github_link = NULLIF($3, '')
 	WHERE 
 		user_id = $4

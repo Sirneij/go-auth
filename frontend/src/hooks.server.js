@@ -31,6 +31,9 @@ export async function handle({ event, resolve }) {
 	const response = await res.json();
 
 	event.locals.user = response;
+	if (event.locals.user.profile.birth_date) {
+		event.locals.user.profile.birth_date = response['profile']['birth_date'].split('T')[0];
+	}
 
 	// load page as normal
 	return await resolve(event);

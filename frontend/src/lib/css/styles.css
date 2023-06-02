@@ -389,17 +389,17 @@ li strong {
 }
 .warning {
 	margin: 20px 0;
-	padding: 20px;
+	padding: 1rem;
 	width: 100%;
 	box-sizing: border-box;
-	background-color: rgba(250, 200, 99, 0.2);
-	border: 1px solid #fac863;
+	background-color: rgb(255 228 230);
+	border: 1px solid rgb(225 29 72);
 	border-radius: 6px;
-	color: #fac863;
+	color: rgb(225 29 72);
 	font-size: 16px;
 }
 .warning a {
-	color: #fac863;
+	color: rgb(225 29 72);
 	text-decoration: underline;
 }
 .warning.hidden {
@@ -476,5 +476,34 @@ li strong {
 @media (min-width: 680px) {
 	.footer-container {
 		padding: 0;
+	}
+}
+
+.simple-loader {
+	--b: 20px; /* border thickness */
+	--n: 15; /* number of dashes*/
+	--g: 7deg; /* gap  between dashes*/
+	--c: #d43aff; /* the color */
+
+	width: 40px; /* size */
+	aspect-ratio: 1;
+	border-radius: 50%;
+	padding: 1px; /* get rid of bad outlines */
+	background: conic-gradient(#0000, var(--c)) content-box;
+	--_m: /* we use +/-1deg between colors to avoid jagged edges */ repeating-conic-gradient(
+			#0000 0deg,
+			#000 1deg calc(360deg / var(--n) - var(--g) - 1deg),
+			#0000 calc(360deg / var(--n) - var(--g)) calc(360deg / var(--n))
+		),
+		radial-gradient(farthest-side, #0000 calc(98% - var(--b)), #000 calc(100% - var(--b)));
+	-webkit-mask: var(--_m);
+	mask: var(--_m);
+	-webkit-mask-composite: destination-in;
+	mask-composite: intersect;
+	animation: load 1s infinite steps(var(--n));
+}
+@keyframes load {
+	to {
+		transform: rotate(1turn);
 	}
 }

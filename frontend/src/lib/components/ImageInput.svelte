@@ -2,14 +2,17 @@
 	// @ts-nocheck
 	export let avatar;
 
-	let thumbnail;
+	export let fieldName;
+	export let title;
+
+	let newAvatar;
 	const onFileSelected = (e) => {
 		const target = e.target;
 		if (target && target.files) {
 			let reader = new FileReader();
 			reader.readAsDataURL(target.files[0]);
 			reader.onload = (e) => {
-				avatar = e.target?.result;
+				newAvatar = e.target?.result;
 			};
 		}
 	};
@@ -21,41 +24,20 @@
 	{:else}
 		<img
 			class="avatar"
-			src="https://cdn4.iconfinder.com/data/icons/small-n-flat/24/user-alt-512.png"
+			src={newAvatar
+				? newAvatar
+				: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/user-alt-512.png'}
 			alt=""
 		/>
+		<input type="file" id="file" name={fieldName} required on:change={(e) => onFileSelected(e)} />
+		<label for="file" class="btn-3">
+			{#if newAvatar}
+				<span>Image selected! Click upload.</span>
+			{:else}
+				<span>{title}</span>
+			{/if}
+		</label>
 	{/if}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		on:click={() => {
-			thumbnail.click();
-		}}
-		class="upload"
-		viewBox="0 0 512 512"
-	>
-		<path
-			d="M220.6 121.2L271.1 96 448 96v96H333.2c-21.9-15.1-48.5-24-77.2-24s-55.2 8.9-77.2 24H64V128H192c9.9 0 19.7-2.3 28.6-6.8zM0 128V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H271.1c-9.9 0-19.7 2.3-28.6 6.8L192 64H160V48c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16l0 16C28.7 64 0 92.7 0 128zM168 304a88 88 0 1 1 176 0 88 88 0 1 1 -176 0z"
-		/>
-	</svg>
-
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div
-		class="chan"
-		on:click={() => {
-			thumbnail.click();
-		}}
-	>
-		Choose Image
-	</div>
-	<input
-		style="display:none"
-		type="file"
-		name="thumbnail"
-		accept="image/*"
-		on:change={(e) => onFileSelected(e)}
-		bind:this={thumbnail}
-	/>
 </div>
 
 <style>
@@ -67,16 +49,64 @@
 		flex-flow: column;
 		color: rgb(148 163 184);
 	}
-	.upload {
-		display: flex;
-		height: 2.7rem;
-		width: 2.7rem;
-		cursor: pointer;
-		fill: rgb(14 165 233);
-	}
+
 	.avatar {
 		display: flex;
-		height: 8rem;
+		height: 6.5rem;
 		width: 8rem;
+	}
+	[type='file'] {
+		height: 0;
+		overflow: hidden;
+		width: 0;
+	}
+	[type='file'] + label {
+		background: #9b9b9b;
+		border: none;
+		border-radius: 5px;
+		color: #fff;
+		cursor: pointer;
+		display: inline-block;
+		font-weight: 500;
+		margin-bottom: 1rem;
+		outline: none;
+		padding: 1rem 50px;
+		position: relative;
+		transition: all 0.3s;
+		vertical-align: middle;
+	}
+	[type='file'] + label:hover {
+		background-color: #9b9b9b;
+	}
+	[type='file'] + label.btn-3 {
+		background-color: #d43aff;
+		border-radius: 0;
+		overflow: hidden;
+	}
+	[type='file'] + label.btn-3 span {
+		display: inline-block;
+		height: 100%;
+		transition: all 0.3s;
+		width: 100%;
+	}
+	[type='file'] + label.btn-3::before {
+		color: #fff;
+		content: '\01F4F7';
+		font-size: 200%;
+		height: 100%;
+		left: 45%;
+		position: absolute;
+		top: -180%;
+		transition: all 0.3s;
+		width: 100%;
+	}
+	[type='file'] + label.btn-3:hover {
+		background-color: rgba(14, 166, 236, 0.5);
+	}
+	[type='file'] + label.btn-3:hover span {
+		transform: translateY(300%);
+	}
+	[type='file'] + label.btn-3:hover::before {
+		top: 0;
 	}
 </style>
