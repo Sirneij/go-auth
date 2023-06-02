@@ -65,7 +65,7 @@
 		{/if}
 
 		<div class="btn-container">
-			<button class="button-colorful">Register</button>
+			<button class="button-dark">Register</button>
 			<p>Already registered? <a href="/auth/login">Login here</a>.</p>
 		</div>
 	</form>

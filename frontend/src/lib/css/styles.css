@@ -177,6 +177,11 @@ li strong {
 	color: #fff;
 }
 
+.header .header-container .header-right a img {
+	margin-top: -0.4rem;
+	height: 28px;
+}
+
 .header .header-container .header-right .header-nav-item a,
 .header .header-container .header-right .header-nav-item button {
 	transition: color 0.3s ease-in-out;
@@ -288,58 +293,6 @@ li strong {
 	.hero-container {
 		margin: 0 auto 140px auto;
 	}
-}
-
-.modal {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate3d(-50%, -50%, 0);
-	display: none;
-	width: 100%;
-	max-width: 600px;
-	padding: 30px;
-	box-sizing: border-box;
-}
-.modal.active,
-.modal.is-active {
-	display: block;
-}
-.modal-header {
-	position: relative;
-	padding: 10px 60px 10px 20px;
-	background: #2f2f2f;
-	border-bottom: 1px solid #00b7ef;
-	font-size: 20px;
-}
-.modal-header .modal-header-close-button {
-	position: absolute;
-	top: 7px;
-	right: 10px;
-	width: 30px;
-	height: 30px;
-	padding: 0 0 2px;
-	background: #2f2f2f;
-	border: 1px solid #00b7ef;
-	border-radius: 50%;
-	color: #00b7ef;
-	font-size: 20px;
-	text-align: center;
-	vertical-align: middle;
-}
-.modal-body {
-	padding: 10px 20px;
-	line-height: 1.5;
-	background: #2f2f2f;
-}
-.modal-background {
-	position: fixed;
-	z-index: -1;
-	top: -100%;
-	left: -50%;
-	width: 100vw;
-	height: 100vh;
-	background: rgba(47, 47, 47, 0.7);
 }
 
 .container {

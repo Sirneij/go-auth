@@ -46,6 +46,6 @@
 			</p>
 		{/if}
 
-		<button class="button-colorful">Request change</button>
+		<button class="button-dark">Request change</button>
 	</form>
 </div>
