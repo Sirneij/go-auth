@@ -63,6 +63,6 @@
 			</p>
 		{/if}
 
-		<button class="button-colorful">Change password</button>
+		<button class="button-dark">Change password</button>
 	</form>
 </div>

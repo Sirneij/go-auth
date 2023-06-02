@@ -46,6 +46,6 @@
 			</p>
 		{/if}
 
-		<button class="button-colorful">Regenerate</button>
+		<button class="button-dark">Regenerate</button>
 	</form>
 </div>

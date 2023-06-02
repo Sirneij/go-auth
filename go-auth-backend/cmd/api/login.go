@@ -25,7 +25,6 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	db_user, err := app.models.Users.GetEmail(input.Email, true)
-
 	if err != nil {
 		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)

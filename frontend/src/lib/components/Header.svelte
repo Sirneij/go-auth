@@ -2,6 +2,7 @@
 	import { applyAction, enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import Developer from '$lib/img/hero-image.png';
+	import Avatar from '$lib/img/teamavatar.png';
 </script>
 
 <header class="header">
@@ -25,6 +26,14 @@
 					<a href="/auth/register">register</a>
 				</div>
 			{:else}
+				<div class="header-nav-item">
+					<a href="/auth/about/{$page.data.user.id}">
+						<img
+							src={$page.data.user.thumbnail ? $page.data.user.thumbnail : Avatar}
+							alt={`${$page.data.user.first_name} ${$page.data.user.last_name}`}
+						/>
+					</a>
+				</div>
 				<form
 					class="header-nav-item"
 					action="/auth/logout"

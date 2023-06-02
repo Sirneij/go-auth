@@ -43,9 +43,8 @@ func (app *application) currentUserHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	db_user, err := app.models.Users.Get(userID.Id)
-
 	if err != nil {
-		app.logger.PrintFatal(err, nil)
+		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}

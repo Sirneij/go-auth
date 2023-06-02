@@ -45,6 +45,6 @@
 			/>
 		</div>
 
-		<button class="button-colorful">Activate</button>
+		<button class="button-dark">Activate</button>
 	</form>
 </div>

@@ -14,7 +14,7 @@
 	};
 
 	let message = '';
-	if ($page.url.search) {
+	if ($page.url.searchParams.get('message')) {
 		message = $page.url.search.split('=')[1].replaceAll('%20', ' ');
 	}
 </script>
@@ -49,7 +49,7 @@
 			<a href="/auth/password/request-change" style="margin-left: 1rem;">Forgot password?</a>
 		</div>
 		<div class="btn-container">
-			<button class="button-colorful">Login</button>
+			<button class="button-dark">Login</button>
 			<p>Have no account? <a href="/auth/register">Register here</a>.</p>
 		</div>
 	</form>

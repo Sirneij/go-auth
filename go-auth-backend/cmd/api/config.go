@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -60,7 +61,21 @@ func updateConfigWithEnvVariables() (*config, error) {
 	// Secret
 	hmc_secret := os.Getenv("HMC_SECRET_KEY")
 	flag.StringVar(&cfg.secret.HMC, "secret-key", hmc_secret, "HMC Secret Key")
+
+	// AWS configs
+	flag.StringVar(&cfg.awsConfig.AccessKeyID, "aws-access-key", os.Getenv("AWS_ACCESS_KEY_ID"), "AWS Access KeyID")
+	flag.StringVar(&cfg.awsConfig.AccessKeySecret, "aws-access-secret", os.Getenv("AWS_SECRET_ACCESS_KEY"), "AWS Access Secret")
+	flag.StringVar(&cfg.awsConfig.Region, "aws-region", os.Getenv("AWS_REGION"), "AWS region")
+	flag.StringVar(&cfg.awsConfig.BucketName, "aws-bucketname", os.Getenv("AWS_S3_BUCKET_NAME"), "AWS bucket name")
 	flag.Parse()
+
+	cfg.awsConfig.BaseURL = fmt.Sprintf(
+		"https://%s.s3.%s.amazonaws.com",
+		cfg.awsConfig.BucketName,
+		cfg.awsConfig.Region,
+	)
+
+	cfg.awsConfig.s3_key_prefix = "media/go-auth/"
 
 	secretKey, err := hex.DecodeString(cfg.secret.HMC)
 	if err != nil {
