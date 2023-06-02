@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -29,5 +30,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/file/upload/", app.uploadFileToS3Handler)
 	router.HandlerFunc(http.MethodDelete, "/file/delete/", app.deleteFileOnS3Handler)
 
-	return app.recoverPanic(router)
+	// Metrics
+	router.Handler(http.MethodGet, "/metrics/", expvar.Handler())
+
+	return app.metrics(app.recoverPanic(router))
 }
