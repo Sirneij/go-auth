@@ -5,11 +5,10 @@
 <div class="hero-container">
 	<div class="hero-logo"><img src={Developer} alt="John Owolabi Idogun" /></div>
 	<h3 class="hero-subtitle subtitle">
-		Web Authentication is a new standard enabling the creation and use of strong, attested, scoped,
-		public key-based credentials by web applications, for the purpose of strongly authenticating
-		users using hardware authenticators.
+		This application is the demonstration of a series of tutorials on session-based authentication
+		using Go at the backend and JavaScript (SvelteKit) on the front-end.
 	</h3>
 	<div class="hero-buttons-container">
-		<a class="button-dark" href="/introduction" data-learn-more>Learn more</a>
+		<a class="button-dark" href="https://dev.to/sirneij" data-learn-more>Learn more</a>
 	</div>
 </div>

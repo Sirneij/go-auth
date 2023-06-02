@@ -23,7 +23,7 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 
 		return
 	}
-	expirationStr := fmt.Sprintf("%dm", expirationInt)
+	expirationStr := fmt.Sprintf("%dm", expirationInt*2)
 
 	// Expected data from the user
 	var input struct {
