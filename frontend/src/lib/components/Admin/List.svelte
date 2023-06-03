@@ -14,14 +14,14 @@
 	<div class="stats_more">
 		<div
 			class="stats_more-svg"
-			style="background: linear-gradient(20deg, hsla({15 * idx}, 60%, 50%, .2), 
-            hsla({15 * idx + 20}, 60%, 50%, .3));"
+			style="background: linear-gradient(20deg, hsla({20 * idx}, 60%, 50%, .2), 
+            hsla({20 * idx + 20}, 60%, 50%, .3));"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 				<defs>
 					<linearGradient id="myGradient2" gradientTransform="rotate(20)">
-						<stop offset="0%" stop-color="hsl({15 * idx}, 60%, 50%)" />
-						<stop offset="50%" stop-color="hsl({15 * idx + 20}, 60%, 50%)" />
+						<stop offset="0%" stop-color="hsl({20 * idx}, 60%, 50%)" />
+						<stop offset="50%" stop-color="hsl({20 * idx + 20}, 60%, 50%)" />
 					</linearGradient>
 				</defs>
 				<path

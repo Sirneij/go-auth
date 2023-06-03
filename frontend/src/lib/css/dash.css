@@ -96,7 +96,7 @@ a {
 	max-width: 330px;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: space-evenly;
 	position: relative;
 	transition: 0.25s ease;
 	margin-right: 2rem;
@@ -125,7 +125,7 @@ a {
 .tile-header svg {
 	transition: fill 0.3s ease-in-out;
 	fill: #d43aff;
-	font-size: 2.5rem;
+	font-size: 2rem;
 }
 .tile:hover svg {
 	fill: #c907ff;
@@ -133,7 +133,7 @@ a {
 .tile-header h3 {
 	display: flex;
 	flex-direction: column;
-	line-height: 1.375;
+	line-height: 1.2;
 	margin-left: 0.5rem;
 }
 .tile-header h3 span:first-child {

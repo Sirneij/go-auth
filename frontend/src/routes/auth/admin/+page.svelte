@@ -11,7 +11,7 @@
 	const calculateAvgProTime = (/** @type {any} */ metric) => {
 		const div = metric.total_processing_time_μs / metric.total_requests_received;
 		const inSecs = div * 0.000001;
-		return `${inSecs.toFixed(2)}s`;
+		return `${inSecs.toFixed(2)}s/req`;
 	};
 	const turnMemstatsObjToArray = (/** @type {any} */ metric) => {
 		const exclude = new Set(['PauseNs', 'PauseEnd', 'BySize']);
@@ -66,11 +66,13 @@
 						</svg>
 						<h3>
 							<span>Avg Pro. Time</span>
-							<span>total pro. time / total reqs</span>
+							<span>total pro. time(&mu;s) / total reqs</span>
 						</h3>
 					</div>
 					<p>{calculateAvgProTime(metrics)}</p>
-					<div>{`${metrics.total_processing_time_μs} / ${metrics.total_requests_received}`}</div>
+					<div>
+						{`(${metrics.total_processing_time_μs} / ${metrics.total_requests_received}) x 0.000001`}
+					</div>
 				</article>
 				<article class="tile">
 					<div class="tile-header">
@@ -95,7 +97,7 @@
 							/>
 						</svg>
 						<h3>
-							<span>Goroutines</span>
+							<span>Goroutines used</span>
 							<span>No. of active goroutines</span>
 						</h3>
 					</div>
