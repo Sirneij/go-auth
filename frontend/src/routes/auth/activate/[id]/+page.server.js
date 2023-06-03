@@ -20,7 +20,8 @@ export const actions = {
 	default: async ({ request }) => {
 		const data = await request.formData();
 		const userID = String(data.get('user_id'));
-		const token = String(data.get('token'));
+		let token = String(data.get('token'));
+		token = token.split(' ').join('');
 
 		/** @type {RequestInit} */
 		const requestInitOptions = {

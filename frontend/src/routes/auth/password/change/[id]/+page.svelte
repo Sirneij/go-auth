@@ -13,6 +13,15 @@
 			await applyAction(result);
 		};
 	};
+
+	/** @type {string|undefined} */
+	let token = '';
+
+	$: if (token) {
+		token = token.split(' ').join('');
+		let finalVal = token.match(/.{1,3}/g)?.join(' ');
+		token = finalVal;
+	}
 </script>
 
 <div class="container">
@@ -37,11 +46,11 @@
 				type="text"
 				class="input"
 				name="token"
+				bind:value={token}
 				placeholder="XXX XXX"
 				inputmode="numeric"
-				pattern="\d*"
-				maxlength="6"
-				minlength="6"
+				maxlength="7"
+				minlength="7"
 			/>
 		</div>
 		<div class="input-box">

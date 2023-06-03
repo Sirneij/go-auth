@@ -8,7 +8,8 @@ export const actions = {
 		const formData = await request.formData();
 		const password = String(formData.get('password'));
 		const confirmPassword = String(formData.get('confirm_password'));
-		const token = String(formData.get('token'));
+		let token = String(formData.get('token'));
+		token = token.split(' ').join('');
 		const userID = String(formData.get('user_id'));
 
 		// Some validations

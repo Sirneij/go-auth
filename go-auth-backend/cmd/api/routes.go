@@ -31,7 +31,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/file/delete/", app.deleteFileOnS3Handler)
 
 	// Metrics
-	router.Handler(http.MethodGet, "/metrics/", expvar.Handler())
+	router.Handler(http.MethodGet, "/metrics/", app.authenticateAndAuthorize(expvar.Handler()))
 
 	return app.metrics(app.recoverPanic(router))
 }
