@@ -5,7 +5,7 @@ import { redirect } from '@sveltejs/kit';
 export async function load({ locals, cookies }) {
 	// redirect user if not logged in or not a superuser
 	if (!locals.user || !locals.user.is_superuser) {
-		throw redirect(302, `/auth/login?next=/auth/logout`);
+		throw redirect(302, `/auth/login?next=/auth/admin`);
 	}
 
 	const fetchMetrics = async () => {

@@ -34,11 +34,11 @@
 						/>
 					</a>
 				</div>
-				<!-- {#if $page.data.user.is_superuser} -->
-				<div class="header-nav-item" class:active={$page.url.pathname.startsWith('/auth/admin')}>
-					<a href="/auth/admin">admin</a>
-				</div>
-				<!-- {/if} -->
+				{#if $page.data.user.is_superuser}
+					<div class="header-nav-item" class:active={$page.url.pathname.startsWith('/auth/admin')}>
+						<a href="/auth/admin">admin</a>
+					</div>
+				{/if}
 				<form
 					class="header-nav-item"
 					action="/auth/logout"
