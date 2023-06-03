@@ -15,7 +15,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	id, err := app.readIDParam(r)
 
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -26,7 +25,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -39,7 +37,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 
 	hash, err := app.getFromRedis(fmt.Sprintf("activation_%s", id))
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -47,7 +44,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	tokenHash := fmt.Sprintf("%x\n", sha256.Sum256([]byte(input.Secret)))
 
 	if *hash != tokenHash {
-		app.logger.PrintError(errors.New("the supplied token is invalid"), nil)
+		app.logger.PrintError(errors.New("the supplied token is invalid"), nil, app.config.debug)
 		app.failedValidationResponse(w, r, map[string]string{
 			"token": "The supplied token is invalid",
 		})
@@ -59,20 +56,17 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		app.logger.PrintError(err, map[string]string{
 			"key": fmt.Sprintf("activation_%s", id),
-		})
+		}, app.config.debug)
 
 	}
 
-	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil)
+	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil, app.config.debug)
 
-	result, err := app.models.Users.ActivateUser(*id)
+	_, err = app.models.Users.ActivateUser(*id)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-
-	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil)
 
 	app.successResponse(w, r, http.StatusOK, "Account activated successfully.")
 }

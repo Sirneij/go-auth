@@ -32,11 +32,21 @@ func updateConfigWithEnvVariables() (*config, error) {
 	emailUsername := os.Getenv("EMAIL_USERNAME")
 	emailPassword := os.Getenv("EMAIL_PASSWORD")
 
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var cfg config
 
 	// Basic config
-	flag.IntVar(&cfg.port, "port", 8080, "API server port")
-	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.IntVar(&cfg.port, "port", port, "API server port")
+	flag.BoolVar(&cfg.debug, "debug", debug, "Debug (true|false)")
 	// Database config
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", maxOpenConns, "PostgreSQL max open connections")

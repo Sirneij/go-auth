@@ -33,6 +33,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data interf
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(js)
+
 	return nil
 }
 
@@ -96,7 +97,7 @@ func (app *application) background(fn func()) {
 		// Recover any panic.
 		defer func() {
 			if err := recover(); err != nil {
-				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+				app.logger.PrintError(fmt.Errorf("%s", err), nil, app.config.debug)
 			}
 		}()
 		// Execute the arbitrary function that we passed as the parameter.
@@ -147,17 +148,15 @@ func (app *application) extractParamsFromSession(r *http.Request) (*data.UserID,
 		var status int
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
-			app.logger.PrintError(err, nil)
 			status = http.StatusUnauthorized
 			errorData = errors.New("you are not authorized to access this resource")
 
 		case errors.Is(err, cookies.ErrInvalidValue):
-			app.logger.PrintError(err, nil)
+			app.logger.PrintError(err, nil, app.config.debug)
 			status = http.StatusBadRequest
 			errorData = errors.New("invalid cookie")
 
 		default:
-			app.logger.PrintError(err, nil)
 			status = http.StatusInternalServerError
 			errorData = errors.New("something happened getting your cookie data")
 
@@ -169,7 +168,6 @@ func (app *application) extractParamsFromSession(r *http.Request) (*data.UserID,
 
 	reader := strings.NewReader(gobEncodedValue)
 	if err := gob.NewDecoder(reader).Decode(&userID); err != nil {
-		app.logger.PrintError(err, nil)
 		status := http.StatusInternalServerError
 		return nil, &status, errors.New("something happened decosing your cookie data")
 	}

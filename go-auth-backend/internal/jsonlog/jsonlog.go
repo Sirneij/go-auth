@@ -41,17 +41,17 @@ func New(out io.Writer, minLevel Level) *Logger {
 	return &Logger{out: out, minLevel: minLevel}
 }
 
-func (l *Logger) PrintInfo(message string, properties map[string]string) {
-	l.print(LevelInfo, message, properties)
+func (l *Logger) PrintInfo(message string, properties map[string]string, debug bool) {
+	l.print(LevelInfo, message, properties, debug)
 }
-func (l *Logger) PrintError(err error, properties map[string]string) {
-	l.print(LevelError, err.Error(), properties)
+func (l *Logger) PrintError(err error, properties map[string]string, debug bool) {
+	l.print(LevelError, err.Error(), properties, debug)
 }
-func (l *Logger) PrintFatal(err error, properties map[string]string) {
-	l.print(LevelFatal, err.Error(), properties)
+func (l *Logger) PrintFatal(err error, properties map[string]string, debug bool) {
+	l.print(LevelFatal, err.Error(), properties, debug)
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
-func (l *Logger) print(level Level, message string, properties map[string]string) (int, error) {
+func (l *Logger) print(level Level, message string, properties map[string]string, debugEnv bool) (int, error) {
 	if level < l.minLevel {
 		return 0, nil
 	}
@@ -68,7 +68,7 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 		Properties: properties,
 	}
 
-	if level >= LevelError {
+	if level >= LevelError && debugEnv {
 		aux.Trace = string(debug.Stack())
 	}
 
@@ -85,5 +85,5 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 }
 
 func (l *Logger) Write(message []byte) (n int, err error) {
-	return l.print(LevelError, string(message), nil)
+	return l.print(LevelError, string(message), nil, false)
 }

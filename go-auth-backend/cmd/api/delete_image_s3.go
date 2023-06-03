@@ -10,19 +10,15 @@ func (app *application) deleteFileOnS3Handler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		switch *status {
 		case http.StatusUnauthorized:
-			app.logger.PrintError(err, nil)
 			app.unauthorizedResponse(w, r, err)
 
 		case http.StatusBadRequest:
-			app.logger.PrintError(err, nil)
 			app.badRequestResponse(w, r, errors.New("invalid cookie"))
 
 		case http.StatusInternalServerError:
-			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, err)
 
 		default:
-			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, errors.New("something happened and we could not fullfil your request at the moment"))
 		}
 		return

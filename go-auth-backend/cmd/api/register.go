@@ -21,7 +21,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Try reading the user input to JSON
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -35,7 +35,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Hash user password
 	err = user.Password.Set(input.Password)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+
 		app.serverErrorResponse(w, r, err)
 		return
 	}
@@ -53,10 +53,8 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "A user with this email address already exists")
-			app.logger.PrintError(err, nil)
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
-			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, err)
 		}
 		return
@@ -65,12 +63,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Generate 6-digit token
 	otp, err := tokens.GenerateOTP()
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logError(r, err)
 	}
 
 	err = app.storeInRedis("activation_", otp.Hash, userID.Id, app.config.tokenExpiration.duration)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logError(r, err)
 	}
 
 	now := time.Now()
@@ -88,9 +86,9 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		err = app.mailer.Send(user.Email, "user_welcome.tmpl", data)
 		if err != nil {
-			app.logger.PrintError(err, nil)
+			app.logError(r, err)
 		}
-		app.logger.PrintInfo("Email successfully sent.", nil)
+		app.logger.PrintInfo("Email successfully sent.", nil, app.config.debug)
 	})
 
 	// Respond with success

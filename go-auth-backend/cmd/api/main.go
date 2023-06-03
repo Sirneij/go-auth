@@ -21,9 +21,9 @@ import (
 const version = "1.0.0"
 
 type config struct {
-	port int
-	env  string
-	db   struct {
+	port  int
+	debug bool
+	db    struct {
 		dsn          string
 		maxOpenConns int
 		maxIdleConns int
@@ -74,22 +74,22 @@ func main() {
 
 	cfg, err := updateConfigWithEnvVariables()
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		logger.PrintFatal(err, nil, cfg.debug)
 	}
 
 	db, err := openDB(*cfg)
 
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		logger.PrintFatal(err, nil, cfg.debug)
 	}
 
 	defer db.Close()
 
-	logger.PrintInfo("database connection pool established", nil)
+	logger.PrintInfo("database connection pool established", nil, cfg.debug)
 
 	opt, err := redis.ParseURL(cfg.redisURL)
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		logger.PrintFatal(err, nil, cfg.debug)
 	}
 
 	sdkConfig := aws.Config{
@@ -103,7 +103,7 @@ func main() {
 
 	client := redis.NewClient(opt)
 
-	logger.PrintInfo("redis connection pool established", nil)
+	logger.PrintInfo("redis connection pool established", nil, cfg.debug)
 
 	expvar.NewString("version").Set(version)
 	expvar.Publish("goroutines", expvar.Func(func() interface{} {
@@ -127,7 +127,7 @@ func main() {
 
 	err = app.serve()
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		logger.PrintFatal(err, nil, cfg.debug)
 	}
 
 }

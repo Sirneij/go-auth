@@ -14,19 +14,16 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		switch *status {
 		case http.StatusUnauthorized:
-			app.logger.PrintError(err, nil)
 			app.unauthorizedResponse(w, r, err)
 
 		case http.StatusBadRequest:
-			app.logger.PrintError(err, nil)
 			app.badRequestResponse(w, r, errors.New("invalid cookie"))
 
 		case http.StatusInternalServerError:
-			app.logger.PrintError(err, nil)
 			app.serverErrorResponse(w, r, err)
 
 		default:
-			app.logger.PrintError(err, nil)
+
 			app.serverErrorResponse(
 				w,
 				r,
@@ -38,7 +35,6 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 
 	db_user, err := app.models.Users.Get(userID.Id)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -54,7 +50,6 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -86,14 +81,13 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 
 	updated_user, err := app.models.Users.Update(db_user)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	err = app.writeJSON(w, http.StatusOK, updated_user, nil)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
 	}
+	app.logSuccess(r, http.StatusOK, "User updated successfully")
 }

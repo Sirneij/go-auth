@@ -26,19 +26,18 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 
 	db_user, err := app.models.Users.GetEmail(input.Email, true)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
 	match, err := db_user.Password.Matches(input.Password)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+
 		return
 	}
 
 	if !match {
-		app.logger.PrintError(errors.New("email and password combination does not match"), nil)
 		app.badRequestResponse(w, r, errors.New("email and password combination does not match"))
 		return
 	}
@@ -52,7 +51,6 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	// Gob-encode the user data, storing the encoded output in the buffer.
 	err = gob.NewEncoder(&buf).Encode(&userID)
 	if err != nil {
-		app.logger.PrintFatal(err, nil)
 		app.serverErrorResponse(w, r, errors.New("something happened encoding your data"))
 		return
 	}
@@ -62,7 +60,7 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	// Store session in redis
 	err = app.storeInRedis("sessionid_", session, userID.Id, app.config.secret.sessionExpiration)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logError(r, err)
 	}
 
 	cookie := http.Cookie{
@@ -78,10 +76,13 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	// Write an encrypted cookie containing the gob-encoded data as normal.
 	err = cookies.WriteEncrypted(w, cookie, app.config.secret.secretKey)
 	if err != nil {
-		app.logger.PrintFatal(err, nil)
 		app.serverErrorResponse(w, r, errors.New("something happened setting your cookie data"))
 		return
 	}
 
 	app.writeJSON(w, http.StatusOK, db_user, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+	app.logSuccess(r, http.StatusOK, "Logged in successfully")
 }

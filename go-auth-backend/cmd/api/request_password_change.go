@@ -17,7 +17,6 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 
 	expirationInt, err := strconv.Atoi(strings.Split(app.config.tokenExpiration.durationString, "m")[0])
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r,
 			errors.New("something happened and we could not fullfil your request at the moment"))
 
@@ -32,7 +31,6 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 	// Try reading the user input to JSON
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -46,7 +44,6 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 
 	db_user, err := app.models.Users.GetEmail(input.Email, true)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -54,7 +51,6 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 	// Generate 6-digit token
 	otp, err := tokens.GenerateOTP()
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, errors.New("something happened and we could not fullfil your request at the moment"))
 
 		return
@@ -62,7 +58,6 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 
 	err = app.storeInRedis("password_reset_", otp.Hash, db_user.ID, (app.config.tokenExpiration.duration * 2))
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r,
 			errors.New("something happened and we could not fullfil your request at the moment"),
 		)
@@ -85,9 +80,9 @@ func (app *application) requestChangePasswordHandler(w http.ResponseWriter, r *h
 		}
 		err = app.mailer.Send(db_user.Email, "password_reset.tmpl", data)
 		if err != nil {
-			app.logger.PrintError(err, nil)
+			app.logError(r, err)
 		}
-		app.logger.PrintInfo("Email successfully sent.", nil)
+		app.logger.PrintInfo("Email successfully sent.", nil, app.config.debug)
 	})
 
 	// Respond with success

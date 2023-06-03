@@ -18,7 +18,6 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 	// Try reading the user input to JSON
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -32,7 +31,6 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 
 	db_user, err := app.models.Users.GetEmail(input.Email, false)
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -40,7 +38,6 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 	// Generate 6-digit token
 	otp, err := tokens.GenerateOTP()
 	if err != nil {
-		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, errors.New("something happened and we could not fullfil your request at the moment"))
 
 		return
@@ -48,7 +45,7 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 
 	err = app.storeInRedis("activation_", otp.Hash, db_user.ID, app.config.tokenExpiration.duration)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logError(r, err)
 	}
 
 	now := time.Now()
@@ -66,9 +63,9 @@ func (app *application) regenerateTokenHandler(w http.ResponseWriter, r *http.Re
 		}
 		err = app.mailer.Send(db_user.Email, "user_welcome.tmpl", data)
 		if err != nil {
-			app.logger.PrintError(err, nil)
+			app.logError(r, err)
 		}
-		app.logger.PrintInfo("Email successfully sent.", nil)
+		app.logger.PrintInfo("Email successfully sent.", nil, app.config.debug)
 	})
 
 	// Respond with success

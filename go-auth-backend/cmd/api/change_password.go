@@ -16,7 +16,7 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 	id, err := app.readIDParam(r)
 
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logger.PrintError(err, nil, app.config.debug)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -28,7 +28,7 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logger.PrintError(err, nil, app.config.debug)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -41,7 +41,7 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 
 	hash, err := app.getFromRedis(fmt.Sprintf("password_reset_%s", id))
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logger.PrintError(err, nil, app.config.debug)
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -49,7 +49,7 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 	tokenHash := fmt.Sprintf("%x\n", sha256.Sum256([]byte(input.Secret)))
 
 	if *hash != tokenHash {
-		app.logger.PrintError(errors.New("the supplied token is invalid"), nil)
+		app.logger.PrintError(errors.New("the supplied token is invalid"), nil, app.config.debug)
 		app.failedValidationResponse(w, r, map[string]string{
 			"token": "The supplied token is invalid",
 		})
@@ -61,9 +61,9 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		app.logger.PrintError(err, map[string]string{
 			"key": fmt.Sprintf("password_reset_%s", id),
-		})
+		}, app.config.debug)
 	}
-	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil)
+	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil, app.config.debug)
 
 	user := &data.User{
 		ID: *id,
@@ -72,19 +72,19 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 	// Hash user password
 	err = user.Password.Set(input.Password)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logger.PrintError(err, nil, app.config.debug)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	result, err := app.models.Users.UpdateUserPassword(user)
 	if err != nil {
-		app.logger.PrintError(err, nil)
+		app.logger.PrintError(err, nil, app.config.debug)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil)
+	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil, app.config.debug)
 
 	app.successResponse(w, r, http.StatusOK, "Password updated successfully.")
 }
