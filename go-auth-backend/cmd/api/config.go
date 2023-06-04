@@ -29,9 +29,6 @@ func updateConfigWithEnvVariables() (*config, error) {
 		log.Fatal(err)
 	}
 
-	emailUsername := os.Getenv("EMAIL_USERNAME")
-	emailPassword := os.Getenv("EMAIL_PASSWORD")
-
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		log.Fatal(err)
@@ -57,10 +54,15 @@ func updateConfigWithEnvVariables() (*config, error) {
 		"PostgreSQL max connection idle time",
 	)
 	// Email
-	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
-	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
-	flag.StringVar(&cfg.smtp.username, "smtp-username", emailUsername, "SMTP username")
-	flag.StringVar(&cfg.smtp.password, "smtp-password", emailPassword, "SMTP password")
+	emailPortStr := os.Getenv("EMAIL_SERVER_PORT")
+	emailPort, err := strconv.Atoi(emailPortStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	flag.StringVar(&cfg.smtp.host, "smtp-host", os.Getenv("EMAIL_HOST_SERVER"), "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", emailPort, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("EMAIL_USERNAME"), "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("EMAIL_PASSWORD"), "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "GoAuthBackend <no-reply@goauthbackend.johnowolabiidogun.dev>", "SMTP sender")
 
 	// Redis config
