@@ -71,8 +71,7 @@ func updateConfigWithEnvVariables() (*config, error) {
 	// Frontend URL
 	flag.StringVar(&cfg.frontendURL, "frontend-url", os.Getenv("FRONTEND_URL"), "Frontend URL")
 	// Secret
-	hmc_secret := os.Getenv("HMC_SECRET_KEY")
-	flag.StringVar(&cfg.secret.HMC, "secret-key", hmc_secret, "HMC Secret Key")
+	flag.StringVar(&cfg.secret.HMC, "secret-key", os.Getenv("HMC_SECRET_KEY"), "HMC Secret Key")
 
 	// AWS configs
 	flag.StringVar(&cfg.awsConfig.AccessKeyID, "aws-access-key", os.Getenv("AWS_ACCESS_KEY_ID"), "AWS Access KeyID")
