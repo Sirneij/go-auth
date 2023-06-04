@@ -51,6 +51,12 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	_, err = app.models.Users.ActivateUser(*id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	ctx := context.Background()
 	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("activation_%s", id)).Result()
 	if err != nil {
@@ -61,12 +67,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil, app.config.debug)
-
-	_, err = app.models.Users.ActivateUser(*id)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
 
 	app.successResponse(w, r, http.StatusOK, "Account activated successfully.")
 }
