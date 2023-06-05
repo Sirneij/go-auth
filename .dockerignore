@@ -1,5 +1,5 @@
 # flyctl launch added from frontend/.gitignore
-frontend/
+frontend/*
 # flyctl launch added from go-auth-backend/.gitignore
 go-auth-backend/**/.env.*
 go-auth-backend/**/.envrc
