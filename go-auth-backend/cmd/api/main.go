@@ -5,6 +5,7 @@ import (
 	"expvar"
 	"os"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
@@ -85,7 +86,9 @@ func main() {
 
 	defer db.Close()
 
-	logger.PrintInfo("database connection pool established", nil, cfg.debug)
+	logger.PrintInfo("database connection pool established", map[string]string{
+		"debug": strconv.FormatBool(cfg.debug),
+	}, cfg.debug)
 
 	opt, err := redis.ParseURL(cfg.redisURL)
 	if err != nil {

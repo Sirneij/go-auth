@@ -1,12 +1,12 @@
 FROM golang:1.19-alpine AS builder
 WORKDIR /app
-COPY . .
+COPY ./go-auth-backend/ .
 RUN go mod download
 RUN go build -ldflags='-s' -o=./bin/api ./cmd/api
 
 
 FROM alpine:latest AS runner
-WORKDIR /app
-COPY --from=builder /app/bin/api .
+WORKDIR /
+COPY --from=builder /app/bin/api /api
 EXPOSE 8080
-ENTRYPOINT ["./bin/api"]
+ENTRYPOINT ["/api"]

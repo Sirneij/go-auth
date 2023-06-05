@@ -14,10 +14,21 @@ import (
 
 func updateConfigWithEnvVariables() (*config, error) {
 	// Load environment variables from `.env` file
-	err := godotenv.Load(".env", ".env.development")
+	var cfg config
+	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(err)
 	}
+	flag.BoolVar(&cfg.debug, "debug", debug, "Debug (true|false)")
+	flag.Parse()
+
+	if cfg.debug {
+		err = godotenv.Load(".env", ".env.development")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
+
 	maxOpenConnsStr := os.Getenv("DB_MAX_OPEN_CONNS")
 	maxOpenConns, err := strconv.Atoi(maxOpenConnsStr)
 	if err != nil {
@@ -34,16 +45,8 @@ func updateConfigWithEnvVariables() (*config, error) {
 		log.Fatal(err)
 	}
 
-	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var cfg config
-
 	// Basic config
 	flag.IntVar(&cfg.port, "port", port, "API server port")
-	flag.BoolVar(&cfg.debug, "debug", debug, "Debug (true|false)")
 	// Database config
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", maxOpenConns, "PostgreSQL max open connections")
