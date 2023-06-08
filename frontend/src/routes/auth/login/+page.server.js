@@ -47,7 +47,6 @@ export const actions = {
 		}
 
 		if (res.headers.has('Set-Cookie')) {
-			console.log();
 			const sessionID = Object.fromEntries(res.headers)
 				['set-cookie'].split(';')[0]
 				.split(/=(.*)/s)[1];

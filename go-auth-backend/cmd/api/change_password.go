@@ -56,15 +56,6 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	ctx := context.Background()
-	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("password_reset_%s", id)).Result()
-	if err != nil {
-		app.logger.PrintError(err, map[string]string{
-			"key": fmt.Sprintf("password_reset_%s", id),
-		}, app.config.debug)
-	}
-	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil, app.config.debug)
-
 	user := &data.User{
 		ID: *id,
 	}
@@ -85,6 +76,16 @@ func (app *application) changePasswordHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	app.logger.PrintInfo(fmt.Sprintf("%x", result), nil, app.config.debug)
+
+	ctx := context.Background()
+	deleted, err := app.redisClient.Del(ctx, fmt.Sprintf("password_reset_%s", id)).Result()
+	if err != nil {
+		app.logger.PrintError(err, map[string]string{
+			"key": fmt.Sprintf("password_reset_%s", id),
+		}, app.config.debug)
+	}
+	app.logger.PrintInfo(fmt.Sprintf("Token hash was deleted successfully :activation_%d", deleted), nil, app.config.debug)
+
 
 	app.successResponse(w, r, http.StatusOK, "Password updated successfully.")
 }
